@@ -1,0 +1,15 @@
+loops routine="#"
+io routine="#"
+memory routine="#"
+barrier routine="#"
+fence routine="#"
+notify routine="#"
+phase routine="#"
+timer routine="#"
+decl routine="#" code="/*TODO:dummy TAU_DECL, buggy?*/"
+BEGIN_INSTRUMENT_SECTION
+entry routine="#" code="entry"
+exit routine="#" code="exit"
+END_INSTRUMENT_SECTION
+abort routine="#" code="/*TODO:dummy TAU_ABORT*/"
+init code="/*TODO:dummy TAU_INIT*/"

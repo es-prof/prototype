@@ -1,0 +1,15 @@
+g++-6_HEADERS
+g++-6_HEADERS/hdrs
+g++-6_HEADERS/hdrs1
+g++-6_HEADERS/hdrs3
+g++-6_HEADERS/hdrs4
+g++-6_HEADERS/hdrs6
+.
+/home/liyixiao/profiler/rose-cross/build/install/include/rose
+/usr/lib/gcc/x86_64-pc-linux-gnu/6.4.1/include/c++
+/usr/lib/gcc/x86_64-pc-linux-gnu/6.4.1/include/c++/x86_64-pc-linux-gnu
+/usr/lib/gcc/x86_64-pc-linux-gnu/6.4.1/include/c++/backward
+/usr/lib/gcc/x86_64-pc-linux-gnu/6.4.1/include
+/usr/local/include
+/usr/lib/gcc/x86_64-pc-linux-gnu/6.4.1/include-fixed
+/usr/include

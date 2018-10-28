@@ -1,0 +1,11 @@
+PEBIL is a binary rewriter tool. Its source code is available using:
+git clone -b development git://github.com/mlaurenzano/PEBIL
+and is also stored at:
+http://tau.uoregon.edu/pdt_releases/pebil_Nov12.tgz 
+Please refer to the PEBIL.License file. 
+
+While using with TAU, please use:
+export TAU_PROFILE_FORMAT="merged"
+tau_pebil_rewrite -T icpc,mpi,pdt,papi app -o app.i
+mpirun -np 4 ./app.i
+

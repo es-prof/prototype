@@ -1,0 +1,318 @@
+.\" File generated using by MAQAO.
+.TH MAQAO-LPROF "1" "10/17/2017" "MAQAO-LPROF 2.3.2" "User Commands"
+.SH NAME
+maqao-lprof \- manual page for maqao lprof module.
+.SH SYNOPSIS
+
+.br
+	Data collection mode : maqao lprof [OPTIONS] -- <Application> [arguments...]
+.br
+	Data display mode    : maqao lprof xp=<Experiment_Directory> [--display-functions | --display-loops] [OPTIONS]
+.SH DESCRIPTION
+
+.br
+The MAQAO Lightweight Profiler (LProf) allows you to easily profile your application to detect hot functions and loops in 2 steps.
+.br
+	1) Data collection in two available modes:
+.br
+		 * sampling (default)
+.br
+		 * instrumentation
+.br
+	2) Data display
+.SH OPTIONS
+.TP
+\fB\-xp=\fR, \fB\-\-experiment-path= [OPTIONAL]\fR
+The experiment path where the collected data is stored is generated in the current directory. 
+.br
+If not specified a default directory of the format maqao_MMDDYYYYHHMM is created. 
+.br
+/!\e Warning: In display mode, this directory is used to load the collected data and is a mandatory parameter. 
+.SH "    DATA COLLECTION"
+.TP
+\fB\-cms\fR, \fB\-\-collect-mode-sampling\fR
+Data sampling using Hardware Performance Counters (default).
+.TP
+\fB\-cmi\fR, \fB\-\-collect-mode-instrumentation\fR
+Insert probes into the binary application (binary rewriting). 
+.br
+
+.br
+/!\e Warning: The instrumentation-profile option is required in this mode. 
+.SH "       SAMPLING MODE"
+.TP
+\fB\-cdo\fR, \fB\-\-checking-directory-off [OPTIONAL]\fR
+Disable checking if the specified experiment directory already exists. 
+.br
+By default, a check is always performed to avoid modifying an existing experiment directory. 
+.br
+This option would be needed on old file systems and MPI runs. 
+.TP
+\fB\-g=\fR, \fB\-\-granularity= [OPTIONAL]\fR
+Granularity option  allows to change the number of collected samples. 
+.br
+There are 3 available granularities depending of the execution time of the application: 
+.br
+  - small  : less than 1 min 
+.br
+  - medium : between 1 min to 1 hour (default) 
+.br
+  - large  : over 1 hour
+.TP
+\fB\-hwc=\fR, \fB\-\-hardware-counters [OPTIONAL]\fR
+Select hardware counters to profile in a list. 
+.br
+For each hardware counter the threshold value should be set using this format "@VALUE". 
+.br
+Raw codes can be used as well as hardware counter names. 
+.br
+e.g.: hwc=CPU_CLK_UNHALTED@1000000,0x412e@1000000,INST_RETIRED@1000000
+.TP
+\fB\-iio\fR, \fB\-\-inlined-info-off [OPTIONAL]\fR
+Used to disable the reference to analyzed inlined functions in the data collection mode. 
+.TP
+\fB\-kdo\fR, \fB\-\-kernel-detection-off [OPTIONAL]\fR
+The maqao profiler works only for the 2.6.32-279 kernel version and up. 
+.br
+Used to disable the check for the kernel version. 
+.br
+
+.br
+/!\e Warning: Results are not guaranteed! 
+.TP
+\fB\-ldi=\fR, \fB\-\-library-debug-info= [OPTIONAL]\fR
+Analyzes libraries debug information to get loops details with --display-loops option and retrieves functions inlined in the library. 
+.br
+Libraries need to be compiled with the -g option. 
+.br
+The allowed values are: 
+.br
+  - lib1.so, lib2.so, ... : Get loops info in scanning debug information only for libraries in the list. 
+.br
+  - on                    : Get loops info in scanning debug information for all libraries. 
+.br
+  - off                   : Get only functions info using ELF information for all libraries (default). 
+.br
+
+.br
+/!\e Warning: This flag can increase the analysis overhead. 
+.TP
+\fB\-ug=\fR, \fB\-\-user-guided=[(on|off) or time_in_sec] [OPTIONAL]\fR
+This option allows the user to control the sampling in two modes: 
+.br
+  - timer mode  : User defined delay (in seconds) before the data collection process. 
+.br
+                  Useful to avoid the initialization part of an application. 
+.br
+  - signal mode : Uses SIGTSTP signal (CTRL+Z) to activate/deactivate the data collection process 
+.br
+                  Can be used as many times as necessary during the run of the application. 
+.TP
+\fB\-btm=\fR, \fB\-\-backtrace-mode= [OPTIONAL]\fR
+[Advanced] Selects the perf_event_open sample type used to collect callchains: 
+.br
+  - call   : Uses the PERF_SAMPLE_CALLCHAIN sample type (default). 
+.br
+  - stack  : Uses the PERF_SAMPLE_STACK_USER sample type. 
+.br
+             Allows stack unwinding. Requires Linux 3.7. 
+.br
+  - branch : Uses the PERF_SAMPLE_BRANCH_STACK sample type. 
+.br
+             Uses CPU sampling hardware. Requires Linux 3.4. 
+.br
+  - off    : Disables callchains collection. 
+.br
+             Reduces sampling overhead and experiment directory size but some OpenMP/MPI functions/loops will no more be correctly categorized at display. 
+.SH "       INSTRUMENTATION MODE"
+.TP
+\fB\-ip=\fR, \fB\-\-instrumentation-profile=\fR
+Selects target instrumentation profile: 
+.br
+  - FI : Measures inclusive time spent by functions 
+.br
+  - FX : Measures exclusive and inclusive time spent by functions 
+.br
+  - LO : Measures time spent in outermost loops 
+.br
+  - LI : Measures time spent in innermost loops 
+.TP
+\fB\-im=\fR, \fB\-\-instrumentation-model= [OPTIONAL]\fR
+Selects the model of the application: 
+.br
+ - Unicore  : One core and one thread (default) 
+.br
+ - IOMP     : Support for Intel OpenMP runtimes 
+.br
+ - GOMP     : Support for GNU OpenMP runtimes
+.TP
+\fB\-iff=\fR, \fB\-\-instrumentation-filter-function= [OPTIONAL]\fR
+Measures a list of functions provided by the user in this format : foo,bar,main,... 
+.SH "    DATA DISPLAY"
+.SH "       SAMPLING MODE"
+.TP
+\fB\-df\fR, \fB\-\-display-functions\fR
+Displays the exclusive time spent in the aplication,libraries and system functions. 
+.TP
+\fB\-dl\fR, \fB\-\-display-loops\fR
+Displays the exclusive time spent in the application loops. 
+.br
+If used with library-debug-information option during the collection, library loops information will be displayed too. 
+.TP
+\fB\-dt\fR, \fB\-\-display-by-threads [OPTIONAL]\fR
+Information is displayed by thread. 
+.TP
+\fB\-cv=\fR, \fB\-\-category-view= [OPTIONAL]\fR
+Displays information in one of the following modes:  
+.br
+  - summary : Display categorization table. The information for threads/processes/nodes are grouped in one table (default). 
+.br
+  - node    : Display categorization table at node level. 
+.br
+  - process : Display categorization table at process level. 
+.br
+  - thread  : Display categorization table at thread level.. 
+.br
+  - full    : Display all the above categorization tables (summary, node, process, thread). 
+.br
+
+.br
+The categorization table shows the time percentage for each of the categories below: 
+.br
+  - Application   : Time percentage of application. 
+.br
+  - MPI           : Time percentage of MPI runtime (openmpi, mpich, intel mpi,...) 
+.br
+  - OMP           : Time percentage of OpenMP runtime (gomp, iomp...). 
+.br
+  - Math          : Time percentage of Math libraries (libm, libmkl, libblas...). 
+.br
+  - System        : Time percentage of system interface (linux system calls). 
+.br
+  - Pthread       : Time percentage of Pthread runtime. 
+.br
+  - I/O           : Time percentage of I/O functions. 
+.br
+  - String        : Time percentage of string manipulation functions (strcpy, trim...). 
+.br
+  - Memory        : Time percentage of memory management functions (malloc, free...). 
+.br
+  - Others        : Time percentage of functions that are not of the categories above. 
+.TP
+\fB\-of=\fR, \fB\-\-output-format=[csv|html] [OPTIONAL]\fR
+Outputs results in a file of the given format: 
+.br
+  - html : Generate an index.html file into <PROFILING_DIRECTORY>/html/index.html 
+.br
+  - csv  : Generate a csv file for each thread (default name: <CURRENT_DIRECTORY>/maqao_<NODE-NAME>_<THREAD-ID>.csv). 
+.TP
+\fB\-op=\fR, \fB\-\-output-path= [OPTIONAL AND SHOULD BE USED WITH THE output-format OPTION]\fR
+Specifies the path of the generated results files. 
+.TP
+\fB\-\-output-prefix= [OPTIONAL AND SHOULD BE USED WITH THE output-format OPTION]\fR
+Add a custom prefix to the generated results files. 
+.TP
+\fB\-cc\fR, \fB\-\-callchain [OPTIONAL]\fR
+Displays the callchain (if available) for each function with a scope limited to the application. 
+.TP
+\fB\-ccl\fR, \fB\-\-callchain-lib [OPTIONAL]\fR
+Extends the callchain scope to external libraries function calls. 
+.TP
+\fB\-cca\fR, \fB\-\-callchain-all [OPTIONAL]\fR
+Displays the callchain with no limited scope (application + libraries + system calls). 
+.TP
+\fB\-cco\fR, \fB\-\-callchain-off [OPTIONAL]\fR
+Disables callchains analysis. Some OpenMP/MPI functions/loops will no more be correctly categorized. Use this only when display takes too much time/memory. 
+.TP
+\fB\-cwf=\fR, \fB\-\-callchain-weight-filter= [OPTIONAL]\fR
+Allows to filter the callchains that don't represent at least X percent of time in the function reference. 
+.br
+Available values : A number X between 0 and 100 
+.TP
+\fB\-sso\fR, \fB\-\-samples-value-on [OPTIONAL]\fR
+Displays the number of samples collected (in between brackets). 
+.TP
+\fB\-ct=\fR, \fB\-\-cumulative-threshold= [OPTIONAL]\fR
+Displays the top loops/functions which cumulative percentage is greater than the given value (e.g: ct=50). 
+.SH "       INSTRUMENTATION MODE"
+.TP
+\fB\-dt=\fR, \fB\-\-display-type= [OPTIONAL]\fR
+ - txt : raw text format (default) 
+.br
+ - dot : Dot graph format 
+.br
+ - png : Portable Network Graphics image format 
+.TP
+\fB\-ft=\fR, \fB\-\-filter-thread= [OPTIONAL]\fR
+Selects the threads using the given list of OpenMP ids (e.g: 0,1,8,...). 
+.SH EXAMPLES
+.TP
+maqao lprof <APPLICATION>
+Launch the profiler in collect sampling mode on the application. 
+.br
+It stores the results into a default experiment directory (maqao_MMDDYYHHMM). 
+.br
+M: Month, D: Day, Y: Year, H: Hour, M: Minute 
+.TP
+maqao lprof xp=<EXPERIMENT_DIRECTORY> -- <APPLICATION>  arg1 arg2 ...
+If the application need one or more arguments, use the '--' delimiter. 
+.br
+It stores the results into the directory given by the user. 
+.TP
+maqao lprof xp=<EXPERIMENT_DIRECTORY> -df
+Displays the list of functions coming from the experiment directory into the terminal. 
+.br
+The function display mode allows to localized where are the hot functions of the application. 
+.TP
+maqao lprof xp=<EXPERIMENT_DIRECTORY> -df -cc -cv=full
+Displays the list of functions coming from the experiment directory into the terminal. 
+.br
+The -cc (--callchain) option allows to display the callchains. 
+.br
+The -cv=full (--category-view) option allows to display all the categorization tables. 
+.br
+The function display mode allows to localized where are the hot functions of the application. 
+.TP
+maqao lprof xp=<EXPERIMENT_DIRECTORY> -df of=csv op=$PWD/help_example
+Generates a CSV file for each thread with the functions info into $PWD named help_example_<NODE-NAME>_<THREAD-ID>.csv . 
+.TP
+maqao lprof xp=<EXPERIMENT_DIRECTORY> -dl
+Displays the list of loops coming from the experiment folder into the terminal. 
+.br
+The loop display mode allows to localized where are the hot loops of the application.  
+.TP
+maqao lprof xp=<EXPERIMENT_DIRECTORY> of=html
+Generates the html directory into <EXPERIMENT_DIRECTORY>/html. 
+.br
+To view the result, open with your web browser the file <EXPERIMENT_DIRECTORY>/html/index.html. 
+.TP
+maqao lprof im=IOMP ip=FX xp=<EXPERIMENT_DIRECTORY> <APPLICATION>
+Selects FX profile with OpenMP (icc). Store results  
+.br
+and instrumented binary in the specified <EXPERIMENT_DIRECTORY>. 
+.br
+Intel OpenMP runtime is selected as the runtime model. 
+.TP
+maqao lprof ip=FX -dt=png -xp=<EXPERIMENT_DIRECTORY> 
+Displays results from the previous output path as an image. 
+.TP
+maqao lprof -ip=FX -dt=txt -xp=<EXPERIMENT_DIRECTORY> 
+Displays results from the previous output path as a text.
+.SH AUTHOR
+Written by The MAQAO Team.
+.SH "REPORTING BUGS"
+Report bugs to <support@maqao.org>.
+.SH COPYRIGHT
+MAQAO (C), 2004-2017 Universite de Versailles Saint-Quentin-en-Yvelines (UVSQ), 
+is distributed under the GNU Lesser General Public License (GNU LGPL). MAQAO is 
+free software; you can use it under the terms of the GNU Lesser General 
+Public License as published by the Free Software Foundation; either version 2.1 
+of the License, or (at your option) any later version. This software is distributed 
+in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
+implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+GNU Lesser General Public License for more details.
+
+The full legal text of the GNU Lesser General Public License (GNU LGPL) is available
+at http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+.SH "SEE ALSO"
+maqao(1), maqao-madras(1), maqao-oneview(1), maqao-disass(1), maqao-cqa(1), maqao-mil(1), maqao-mil2(1), maqao-analyze(1)
